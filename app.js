@@ -7,7 +7,7 @@ const navLinks = document.querySelectorAll('.nav-link');
 const sections = document.querySelectorAll('.section');
 
 // Typewriter animation
-const fullText = "Welcome, I'm Bhargava Sarma";
+const fullText = "Welcome, I'm Bhargava";
 let currentText = '';
 let letterIndex = 0;
 
