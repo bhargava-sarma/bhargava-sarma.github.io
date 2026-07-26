@@ -12,7 +12,9 @@
 </head>
 <body>
 
-<header class="nav" id="top">
+<a id="top" class="top-sentinel" tabindex="-1"></a>
+
+<header class="nav">
   <a href="#top" class="nav__mark">D&nbsp;Bhargava</a>
   <nav class="nav__links">
     <a href="#work">Work</a>
@@ -43,6 +45,7 @@
       <a class="btn btn--ghost" href="RESUME_D_BHARGAVA_RAMA_SARMA.pdf" target="_blank" rel="noopener">Download resume</a>
     </div>
   </section>
+
   <div class="marquee" aria-hidden="true">
     <div class="marquee__track">
       <div class="marquee__group">
@@ -57,6 +60,7 @@
       </div>
     </div>
   </div>
+
   <section class="section" id="work" aria-label="Work experience">
     <div class="section__head reveal">
       <h2>Work</h2>
@@ -83,6 +87,7 @@
       </article>
     </div>
   </section>
+
   <section class="section" id="projects" aria-label="Projects">
     <div class="section__head reveal">
       <h2>Projects</h2>
@@ -151,6 +156,7 @@
       </article>
     </div>
   </section>
+
   <section class="section" id="skills" aria-label="Skills">
     <div class="section__head reveal">
       <h2>Skills</h2>
@@ -180,6 +186,7 @@
       </div>
     </div>
   </section>
+
   <section class="section" id="extra" aria-label="Extracurriculars and achievements">
     <div class="section__head reveal">
       <h2>Extracurriculars &amp; Achievements</h2>
@@ -205,6 +212,7 @@
       </div>
     </div>
   </section>
+
   <section class="section" id="education" aria-label="Education">
     <div class="section__head reveal">
       <h2>Education</h2>
@@ -224,9 +232,13 @@
       </div>
     </div>
   </section>
+
   <section class="cta" id="contact" aria-label="Contact">
     <p class="cta__eyebrow reveal">Get in touch</p>
-    <a class="cta__email reveal" href="mailto:bhargavaramasarma@gmail.com">bhargavaramasarma@gmail.com</a>
+    <button class="cta__email reveal" id="emailBtn" type="button" data-user="bhargavaramasarma" data-domain="gmail.com">
+      bhargavaramasarma<span class="cta__at">[at]</span>gmail<span class="cta__dot">[dot]</span>com
+    </button>
+    <p class="cta__hint reveal" id="emailHint">Click to copy</p>
     <div class="cta__links reveal">
       <a href="https://github.com/bhargava-sarma" target="_blank" rel="noopener">GitHub ↗</a>
       <a href="#" target="_blank" rel="noopener">LinkedIn ↗</a>
