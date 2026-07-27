@@ -1,8 +1,9 @@
- (function () {
+(function () {
   'use strict';
 
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // -- Nav: add a hairline under the bar once the page scrolls --
   var nav = document.querySelector('.nav');
   function onScroll() {
     if (window.scrollY > 8) {
@@ -14,6 +15,7 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  // -- Mobile menu toggle --
   var toggle = document.getElementById('navToggle');
   var links = document.querySelector('.nav__links');
   if (toggle && links) {
@@ -29,6 +31,7 @@
     });
   }
 
+  // -- Scroll-triggered reveals --
   var revealEls = document.querySelectorAll('.reveal');
   if (prefersReducedMotion || !('IntersectionObserver' in window)) {
     revealEls.forEach(function (el) { el.classList.add('is-visible'); });
@@ -47,17 +50,44 @@
     revealEls.forEach(function (el) { observer.observe(el); });
   }
 
+  // -- Marquee: JS-driven loop. Clones the content group enough times
+  //    to guarantee the track is always at least 2x the viewport width,
+  //    so there is always a full group waiting off-screen when the
+  //    position wraps -- this is what makes the loop truly seamless
+  //    regardless of screen width, zoom level, or content length --
   var track = document.querySelector('.marquee__track');
   if (track) {
     var groupWidth = 0;
     var x = 0;
-    var speed = 40;
+    var speed = 40; // px per second
     var lastTime = null;
     var paused = false;
 
-    function measure() {
-      var firstGroup = track.querySelector('.marquee__group');
-      groupWidth = firstGroup ? firstGroup.getBoundingClientRect().width : 0;
+    function ensureCoverage() {
+      var baseGroup = track.querySelector('.marquee__group');
+      if (!baseGroup) return;
+      var viewportWidth = window.innerWidth;
+      var needed = viewportWidth * 2.5;
+
+      // Remove any previously added clones before recalculating,
+      // so resizing to a smaller width doesn't leave excess clones.
+      track.querySelectorAll('.marquee__group[data-clone="true"]').forEach(function (el) {
+        el.remove();
+      });
+
+      var singleWidth = baseGroup.getBoundingClientRect().width;
+      if (singleWidth <= 0) return;
+
+      var totalWidth = singleWidth;
+      while (totalWidth < needed) {
+        var clone = baseGroup.cloneNode(true);
+        clone.setAttribute('data-clone', 'true');
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+        totalWidth += singleWidth;
+      }
+
+      groupWidth = singleWidth;
     }
 
     function step(now) {
@@ -73,8 +103,13 @@
       requestAnimationFrame(step);
     }
 
-    measure();
-    window.addEventListener('resize', measure, { passive: true });
+    ensureCoverage();
+
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(ensureCoverage, 150);
+    }, { passive: true });
 
     var marqueeEl = document.querySelector('.marquee');
     if (marqueeEl) {
@@ -89,6 +124,8 @@
     }
   }
 
+  // -- Back to top: scrolls the window directly; hash navigation is
+  //    prevented entirely so there is no race with native anchor jump --
   var topLinks = document.querySelectorAll('a[href="#top"]');
   topLinks.forEach(function (link) {
     link.addEventListener('click', function (e) {
@@ -102,6 +139,7 @@
     });
   });
 
+  // -- Email: assembled from data attributes and copied on click, not exposed as a mailto link --
   var emailBtn = document.getElementById('emailBtn');
   var emailHint = document.getElementById('emailHint');
   if (emailBtn && emailHint) {
