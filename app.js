@@ -88,6 +88,11 @@
       }
 
       groupWidth = singleWidth;
+      // If a re-measure lands mid-animation with the old x already past
+      // the new groupWidth, normalize it so the next frame doesn't skip.
+      if (groupWidth > 0) {
+        x = x % groupWidth;
+      }
     }
 
     function step(now) {
@@ -104,6 +109,18 @@
     }
 
     ensureCoverage();
+
+    // Fonts load asynchronously; if the marquee measures itself before
+    // JetBrains Mono swaps in, groupWidth is captured against the
+    // fallback font's metrics and never corrected, since a resize event
+    // may never fire during a normal viewing session. Re-measure once
+    // the real font is actually ready.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        ensureCoverage();
+      });
+    }
+    window.addEventListener('load', ensureCoverage);
 
     var resizeTimer;
     window.addEventListener('resize', function () {
