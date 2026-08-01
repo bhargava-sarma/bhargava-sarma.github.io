@@ -23,6 +23,26 @@ app.js       Nav scroll state, mobile menu, reveal animations, marquee, theme to
 CNAME        Custom domain for GitHub Pages
 ```
 
+## Security
+
+The page ships a strict Content Security Policy via `<meta>` (`default-src 'none'`, with
+narrow allowances for the stylesheet, Google Fonts, and the `data:` favicon), plus
+`base-uri 'none'`, `form-action 'none'`, and `require-trusted-types-for 'script'`.
+
+Two things to be aware of when editing:
+
+- **The inline theme script in `index.html` is allowlisted by SHA-256 hash.** Changing that
+  script by even one character invalidates the hash and the browser will silently block it,
+  bringing back the theme flash on reload. The command to regenerate the hash is in a comment
+  directly above the CSP.
+- **Trusted Types is enforced**, so `innerHTML`, `script.textContent`, and similar sinks will
+  throw. Build DOM with `textContent` / `createElement`, as the existing code does.
+
+`frame-ancestors`, HSTS, and `Permissions-Policy` are response headers, which GitHub Pages
+cannot set — they can't be added from this repo. Clickjacking protection therefore relies on
+"Enforce HTTPS" being enabled in the repo's Pages settings; that checkbox is worth confirming
+is on.
+
 ## Running locally
 
 No build step — serve the directory with any static file server and open it in a browser:

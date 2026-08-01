@@ -3,6 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  Content Security Policy. GitHub Pages cannot set response headers, so this is
+  delivered via <meta>; frame-ancestors and HSTS are header-only and therefore
+  cannot be enforced here (see README).
+
+  The script-src hash below covers the inline theme bootstrap script that follows.
+  If that script is edited by even one character the hash must be regenerated, or
+  the browser will block it and the pre-paint theme restore will stop working:
+
+    python3 -c "import re,hashlib,base64;b=re.search(r'<script>(.*?)</script>',open('index.html').read(),re.S).group(1);print('sha256-'+base64.b64encode(hashlib.sha256(b.encode()).digest()).decode())"
+-->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'self' 'sha256-OLmET79af6Yk+QwggkuLwnGx/cluQ6fcAbn8K4D+MtA=';
+  style-src 'self' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self' data:;
+  base-uri 'none';
+  form-action 'none';
+  frame-src 'none';
+  object-src 'none';
+  require-trusted-types-for 'script';
+  upgrade-insecure-requests;
+">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <script>
   (function () {
     try {
@@ -70,7 +95,7 @@
     </p>
     <div class="hero__actions reveal">
       <a class="btn btn--solid" href="#projects">View projects</a>
-      <a class="btn btn--ghost" href="RESUME_D_BHARGAVA_RAMA_SARMA.pdf" target="_blank" rel="noopener">Download resume</a>
+      <a class="btn btn--ghost" href="RESUME_D_BHARGAVA_RAMA_SARMA.pdf" target="_blank" rel="noopener noreferrer">Download resume</a>
     </div>
   </section>
 
@@ -124,7 +149,7 @@
 
     <div class="projects">
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/Distributed-Real-Time-Drawing-Board-with-Mini-RAFT" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/Distributed-Real-Time-Drawing-Board-with-Mini-RAFT" target="_blank" rel="noopener noreferrer">
           <span class="project__index">01</span>
           <span class="project__body">
             <span class="project__title">Real-Time Collaborative Drawing Board</span>
@@ -136,7 +161,7 @@
       </article>
 
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/global-conflict-tracker" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/global-conflict-tracker" target="_blank" rel="noopener noreferrer">
           <span class="project__index">02</span>
           <span class="project__body">
             <span class="project__title">Global Conflict &amp; Event Tracker</span>
@@ -148,7 +173,7 @@
       </article>
 
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/sports-celebrity-classification" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/sports-celebrity-classification" target="_blank" rel="noopener noreferrer">
           <span class="project__index">03</span>
           <span class="project__body">
             <span class="project__title">Sports Celebrity Image Classification</span>
@@ -160,7 +185,7 @@
       </article>
 
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/Election-Management-System" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/Election-Management-System" target="_blank" rel="noopener noreferrer">
           <span class="project__index">04</span>
           <span class="project__body">
             <span class="project__title">Election Management System</span>
@@ -172,7 +197,7 @@
       </article>
 
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/parkinson-disease-detector" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/parkinson-disease-detector" target="_blank" rel="noopener noreferrer">
           <span class="project__index">05</span>
           <span class="project__body">
             <span class="project__title">Parkinson's Disease Detector</span>
@@ -184,7 +209,7 @@
       </article>
 
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/MAR-Jackfruit-Problem-Mini-Project-Team-4" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/MAR-Jackfruit-Problem-Mini-Project-Team-4" target="_blank" rel="noopener noreferrer">
           <span class="project__index">06</span>
           <span class="project__body">
             <span class="project__title">Traffic Sign Detection Robot</span>
@@ -196,7 +221,7 @@
       </article>
 
       <article class="project reveal">
-        <a class="project__link" href="https://github.com/bhargava-sarma/Real-Estate-Price-Prediction" target="_blank" rel="noopener">
+        <a class="project__link" href="https://github.com/bhargava-sarma/Real-Estate-Price-Prediction" target="_blank" rel="noopener noreferrer">
           <span class="project__index">07</span>
           <span class="project__body">
             <span class="project__title">Real Estate Price Prediction</span>
@@ -292,8 +317,8 @@
     </button>
     <p class="cta__hint reveal" id="emailHint">Click to copy</p>
     <div class="cta__links reveal">
-      <a href="https://github.com/bhargava-sarma" target="_blank" rel="noopener">GitHub ↗</a>
-      <a href="#" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://github.com/bhargava-sarma" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="#" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
     </div>
   </section>
 
