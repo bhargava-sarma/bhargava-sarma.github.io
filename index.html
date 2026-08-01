@@ -10,9 +10,8 @@
 
   The script-src hash below covers the inline theme bootstrap script that follows.
   If that script is edited by even one character the hash must be regenerated, or
-  the browser will block it and the pre-paint theme restore will stop working:
-
-    python3 -c "import re,hashlib,base64;b=re.search(r'<script>(.*?)</script>',open('index.html').read(),re.S).group(1);print('sha256-'+base64.b64encode(hashlib.sha256(b.encode()).digest()).decode())"
+  the browser will block it and the pre-paint theme restore will stop working.
+  Run scripts/csp-hash.py to print the correct value.
 -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'none';

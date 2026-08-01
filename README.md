@@ -33,8 +33,9 @@ Two things to be aware of when editing:
 
 - **The inline theme script in `index.html` is allowlisted by SHA-256 hash.** Changing that
   script by even one character invalidates the hash and the browser will silently block it,
-  bringing back the theme flash on reload. The command to regenerate the hash is in a comment
-  directly above the CSP.
+  bringing back the theme flash on reload. After editing it, run `python3 scripts/csp-hash.py`
+  and paste the printed value into the `script-src` directive. `python3 scripts/csp-hash.py
+  --check` verifies the two agree and exits non-zero if they don't.
 - **Trusted Types is enforced**, so `innerHTML`, `script.textContent`, and similar sinks will
   throw. Build DOM with `textContent` / `createElement`, as the existing code does.
 
