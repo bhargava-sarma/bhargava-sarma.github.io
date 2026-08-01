@@ -1,9 +1,12 @@
 :root {
   --bg: #050505;
   --ink: #ededed;
+  --ink-strong: #ffffff;
   --ink-dim: #a3a3a3;
   --gray: #666666;
   --hair: #1a1a1a;
+  --nav-bg: rgba(5, 5, 5, 0.75);
+  --nav-border-scrolled: #2a2a2a;
 
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --sans: 'Inter', -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -11,6 +14,17 @@
   --nav-h: 72px;
   --edge: clamp(20px, 5vw, 72px);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="light"] {
+  --bg: #fdfdfc;
+  --ink: #0a0a0a;
+  --ink-strong: #000000;
+  --ink-dim: #454545;
+  --gray: #6b6b6b;
+  --hair: #e4e4e2;
+  --nav-bg: rgba(253, 253, 252, 0.75);
+  --nav-border-scrolled: #d8d8d6;
 }
 
 @media (max-width: 560px) {
@@ -39,6 +53,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Smoothly animate the theme swap; more specific rules below that
+   already declare `transition` list these same properties themselves
+   so this fallback isn't silently overridden for those elements. */
+*, *::before, *::after {
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease), border-color 0.4s var(--ease), fill 0.4s var(--ease);
+}
+
 a { color: inherit; text-decoration: none; }
 
 .top-sentinel {
@@ -53,7 +74,7 @@ a { color: inherit; text-decoration: none; }
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), background-color 0.4s var(--ease), color 0.4s var(--ease), border-color 0.4s var(--ease);
 }
 .reveal.is-visible {
   opacity: 1;
@@ -69,13 +90,13 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--edge);
-  background: rgba(5, 5, 5, 0.75);
+  background: var(--nav-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--hair);
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, background-color 0.4s var(--ease);
 }
-.nav.is-scrolled { border-bottom-color: #2a2a2a; }
+.nav.is-scrolled { border-bottom-color: var(--nav-border-scrolled); }
 
 .nav__mark {
   font-family: var(--mono);
@@ -130,13 +151,53 @@ a { color: inherit; text-decoration: none; }
   height: 1.5px;
   background: var(--ink);
   display: block;
-  transition: transform 0.25s var(--ease), opacity 0.2s ease;
+  transition: transform 0.25s var(--ease), opacity 0.2s ease, background-color 0.4s var(--ease);
 }
 .nav__toggle[aria-expanded="true"] span:first-child {
   transform: translateY(3.25px) rotate(45deg);
 }
 .nav__toggle[aria-expanded="true"] span:last-child {
   transform: translateY(-3.25px) rotate(-45deg);
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--hair);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.3s var(--ease), background-color 0.4s var(--ease), color 0.4s var(--ease);
+}
+.theme-toggle:hover { border-color: var(--ink); }
+
+.theme-toggle__icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  transition: opacity 0.35s var(--ease), transform 0.45s var(--ease);
+}
+
+.theme-toggle__icon--sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+.theme-toggle__icon--moon { opacity: 1; transform: rotate(0deg) scale(1); }
+
+:root[data-theme="light"] .theme-toggle__icon--sun { opacity: 1; transform: rotate(0deg) scale(1); }
+:root[data-theme="light"] .theme-toggle__icon--moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__icon { transition: opacity 0.01ms; }
 }
 
 @media (max-width: 760px) {
@@ -251,7 +312,7 @@ a:focus-visible, button:focus-visible {
   background: var(--ink);
   color: var(--bg);
 }
-.btn--solid:hover { transform: translateY(-2px); background: #fff; }
+.btn--solid:hover { transform: translateY(-2px); background: var(--ink-strong); }
 
 .btn--ghost {
   border: 1px solid var(--hair);
@@ -401,7 +462,7 @@ a:focus-visible, button:focus-visible {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-height 0.4s var(--ease), opacity 0.35s var(--ease), margin-top 0.4s var(--ease);
+  transition: max-height 0.4s var(--ease), opacity 0.35s var(--ease), margin-top 0.4s var(--ease), color 0.4s var(--ease);
 }
 
 .project__link:hover .project__desc,
@@ -432,7 +493,7 @@ a:focus-visible, button:focus-visible {
 
 @media (max-width: 720px) {
   .project__link { grid-template-columns: 32px 1fr 24px; gap: 16px; padding: 24px 0; }
-  .project__desc { max-height: none; opacity: 1; margin-top: 8px; overflow: visible; transition: none; }
+  .project__desc { max-height: none; opacity: 1; margin-top: 8px; overflow: visible; transition: color 0.4s var(--ease); }
 }
 
 .skills {

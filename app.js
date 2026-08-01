@@ -156,6 +156,31 @@
     });
   });
 
+  // -- Theme toggle: dark by default, choice persisted in localStorage --
+  var themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    var root = document.documentElement;
+    function isLight() {
+      return root.getAttribute('data-theme') === 'light';
+    }
+    function syncToggleState() {
+      var light = isLight();
+      themeToggle.setAttribute('aria-pressed', light ? 'true' : 'false');
+      themeToggle.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+    }
+    syncToggleState();
+    themeToggle.addEventListener('click', function () {
+      if (isLight()) {
+        root.removeAttribute('data-theme');
+        try { localStorage.setItem('theme', 'dark'); } catch (e) {}
+      } else {
+        root.setAttribute('data-theme', 'light');
+        try { localStorage.setItem('theme', 'light'); } catch (e) {}
+      }
+      syncToggleState();
+    });
+  }
+
   // -- Email: assembled from data attributes and copied on click, not exposed as a mailto link --
   var emailBtn = document.getElementById('emailBtn');
   var emailHint = document.getElementById('emailHint');
