@@ -1,0 +1,11 @@
+# Local tool/editor state — never belongs in the published site
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Local dev artifacts
+*.log
