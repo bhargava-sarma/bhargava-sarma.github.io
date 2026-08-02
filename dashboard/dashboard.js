@@ -24,6 +24,19 @@
 (function () {
   'use strict';
 
+  /* Refuse to run in a frame. GitHub Pages cannot send X-Frame-Options, and
+   * frame-ancestors is ignored when a CSP arrives via <meta>, so this is the
+   * only clickjacking defence available to a page that can commit to a repo. */
+  if (window.top !== window.self) {
+    // This script is loaded at the end of <body>, so document.body exists here.
+    // Replacing the body (rather than documentElement) keeps a valid document.
+    var notice = document.createElement('p');
+    notice.textContent = 'This page cannot be embedded. Open it directly.';
+    notice.style.cssText = 'font:14px system-ui;padding:24px;color:#ededed';
+    document.body.replaceChildren(notice);
+    return;
+  }
+
   var REPO = { owner: 'bhargava-sarma', repo: 'bhargava-sarma.github.io', branch: 'main' };
   var TOKEN_KEY = 'gh_token';
 
@@ -483,7 +496,47 @@
       .catch(function (e) { setStatus('load failed: ' + e.message, 'err'); });
   }
 
+  /* Mirrors check_url() in scripts/build.py.
+   *
+   * The local backend re-checks this server-side, but the hosted backend commits
+   * straight to GitHub with no Python in between -- without this a javascript:
+   * URL would reach the repository and then fail the build, leaving the site
+   * un-rebuilt. Catching it here keeps that out of the history entirely. */
+  var SAFE_SCHEMES = ['http', 'https', 'mailto'];
+
+  function urlProblem(value, where) {
+    // Browsers ignore whitespace and control characters inside a URL, so
+    // "java\tscript:" navigates exactly like "javascript:".
+    var collapsed = String(value || '').replace(/[\s\u0000-\u001F]/g, '');
+    var m = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(collapsed);
+    if (m && SAFE_SCHEMES.indexOf(m[1].toLowerCase()) === -1) {
+      return where + ': ' + m[1].toLowerCase() + ': URLs are not allowed';
+    }
+    return null;
+  }
+
+  function urlProblems(data) {
+    var problems = [];
+    function check(v, where) {
+      var p = urlProblem(v, where);
+      if (p) problems.push(p);
+    }
+    check((data.hero || {}).resumeFile, 'Hero resume file');
+    (data.projects || []).forEach(function (p, i) {
+      check(p.url, 'Project ' + (i + 1) + ' URL');
+    });
+    (((data.contact || {}).links) || []).forEach(function (l, i) {
+      check(l.url, 'Contact link ' + (i + 1));
+    });
+    return problems;
+  }
+
   function save() {
+    var problems = urlProblems(content);
+    if (problems.length) {
+      setStatus(problems[0], 'err');
+      return;
+    }
     setStatus('saving…', 'busy');
     $save.disabled = true;
     backend.save(content)

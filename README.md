@@ -82,10 +82,15 @@ pretending to be hidden:
 
 - **It stores no credentials.** Authority comes from a token you supply per session, held in
   `sessionStorage` and gone when the tab closes. Nothing sensitive is in the repository.
-- **The token is verified before use**, and refused if it is read-only or cannot see this
-  repository — so a wrong token fails at the gate, not halfway through a save.
+- **The token is checked against the repository before the editor opens**, so an expired or
+  wrong-repo token fails at the gate. This is a usability guard more than a security one:
+  it reads the repository permissions GitHub reports, which do not always mirror a
+  fine-grained token's exact scope, so a token that passes the gate can still be refused at
+  save time — the error from GitHub is shown as-is when that happens.
 - **Its CSP allows `connect-src` to `api.github.com` and this origin only**, so a script that
   somehow ran on the page has nowhere to exfiltrate a token to.
+- **It refuses to run inside a frame.** Pages cannot send `X-Frame-Options`, and
+  `frame-ancestors` is ignored in a `<meta>` CSP, so the page busts out of frames in JS.
 - **Scope the token narrowly**: fine-grained, this repository only, `Contents: Read and
   write`, short expiry. Then the worst case is edits to this one repo, revocable from
   GitHub's settings at any time.
@@ -113,6 +118,15 @@ Two things to be aware of when editing:
   --check` verifies the two agree and exits non-zero if they don't.
 - **Trusted Types is enforced**, so `innerHTML`, `script.textContent`, and similar sinks will
   throw. Build DOM with `textContent` / `createElement`, as the existing code does.
+- **URLs in `content.json` are restricted to `http`, `https` and `mailto`.** Anything else —
+  `javascript:`, `data:` — is refused by the build and by both dashboards rather than escaped,
+  because escaping does not help when the danger is the scheme itself. Relative links
+  (`#contact`, `resume.pdf`) are unaffected.
+
+Fonts are the one remaining third-party dependency: they come from Google Fonts, which
+cannot be pinned with Subresource Integrity because the stylesheet varies by browser.
+Self-hosting the two font families would remove that dependency and allow `style-src` and
+`font-src` to be narrowed to `'self'`.
 
 `frame-ancestors`, HSTS, and `Permissions-Policy` are response headers, which GitHub Pages
 cannot set — they can't be added from this repo. Clickjacking protection therefore relies on
