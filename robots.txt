@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+# The dashboard is an editing tool, not content. Keeping it out of search results
+# is tidiness rather than a security control -- the page is inert without a token.
+Disallow: /dashboard/

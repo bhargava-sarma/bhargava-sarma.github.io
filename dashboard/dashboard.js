@@ -1,15 +1,35 @@
 /* Portfolio dashboard.
  *
- * Schema-driven editor for content.json. The shape below is the single place
+ * Schema-driven editor for content.json. The SCHEMA below is the single place
  * the form structure is described; every section, field and list control is
  * generated from it, so adding a field to the site means adding one line here
  * rather than hand-writing another form.
  *
+ * One page, two ways of running:
+ *
+ *   local   served by scripts/dashboard.py on 127.0.0.1. Reads and writes the
+ *           file directly and reruns the build; no token, nothing leaves the
+ *           machine.
+ *   remote  served from the live site. Commits content.json through the GitHub
+ *           API using a token held only in this tab's sessionStorage; a GitHub
+ *           Action then reruns the build and republishes.
+ *
+ * Only the BACKENDS differ -- the editor above them is identical, so there is
+ * no second copy of the form logic to keep in sync.
+ *
  * The DOM is built with createElement/textContent throughout -- never innerHTML
- * -- so portfolio copy containing < or & can never be interpreted as markup.
+ * -- so portfolio copy containing < or & can never be interpreted as markup,
+ * and the page satisfies require-trusted-types-for 'script'.
  */
 (function () {
   'use strict';
+
+  var REPO = { owner: 'bhargava-sarma', repo: 'bhargava-sarma.github.io', branch: 'main' };
+  var TOKEN_KEY = 'gh_token';
+
+  var IS_LOCAL = location.hostname === '127.0.0.1' ||
+                 location.hostname === 'localhost' ||
+                 location.protocol === 'file:';
 
   var SCHEMA = [
     {
@@ -327,10 +347,132 @@
     });
   }
 
+  // -- backends --------------------------------------------------------------
+
+  function b64encode(str) {
+    var bytes = new TextEncoder().encode(str);
+    var bin = '';
+    bytes.forEach(function (b) { bin += String.fromCharCode(b); });
+    return btoa(bin);
+  }
+
+  function b64decode(b64) {
+    var bin = atob(String(b64).replace(/\s/g, ''));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  /* Talks to the local editor server. */
+  var LocalBackend = {
+    savedMessage: 'saved — index.html rebuilt',
+    load: function () {
+      return fetch('/api/content').then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    },
+    save: function (data) {
+      return fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data, null, 2)
+      }).then(function (r) {
+        return r.json().then(function (body) {
+          if (!r.ok) throw new Error(body.error || ('HTTP ' + r.status));
+          return body;
+        });
+      });
+    }
+  };
+
+  /* Commits content.json through the GitHub contents API. */
+  var GitHubBackend = {
+    token: null,
+    sha: null,
+    savedMessage: 'committed — the site rebuilds in about a minute',
+
+    url: function (path) {
+      return 'https://api.github.com/repos/' + REPO.owner + '/' + REPO.repo + path;
+    },
+
+    headers: function () {
+      return {
+        'Authorization': 'Bearer ' + this.token,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+    },
+
+    /* Confirms the token actually grants write access before showing the editor,
+       so a read-only or wrong-repo token fails at the gate and not at save time. */
+    verify: function (token) {
+      var self = this;
+      return fetch(self.url(''), {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      }).then(function (r) {
+        if (r.status === 401) throw new Error('token rejected — expired or mistyped');
+        if (r.status === 404) throw new Error('token cannot see this repository');
+        if (!r.ok) throw new Error('GitHub returned HTTP ' + r.status);
+        return r.json();
+      }).then(function (repo) {
+        if (!repo.permissions || !repo.permissions.push) {
+          throw new Error('token is read-only — it needs Contents: Read and write');
+        }
+        self.token = token;
+        return true;
+      });
+    },
+
+    load: function () {
+      var self = this;
+      return fetch(self.url('/contents/content.json?ref=' + REPO.branch),
+                   { headers: self.headers(), cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('could not read content.json (HTTP ' + r.status + ')');
+          return r.json();
+        })
+        .then(function (file) {
+          self.sha = file.sha;   // needed to commit without clobbering
+          return JSON.parse(b64decode(file.content));
+        });
+    },
+
+    save: function (data) {
+      var self = this;
+      return fetch(self.url('/contents/content.json'), {
+        method: 'PUT',
+        headers: self.headers(),
+        body: JSON.stringify({
+          message: 'Update portfolio content via dashboard',
+          content: b64encode(JSON.stringify(data, null, 2) + '\n'),
+          sha: self.sha,
+          branch: REPO.branch
+        })
+      }).then(function (r) {
+        if (r.status === 409 || r.status === 422) {
+          throw new Error('content.json changed elsewhere — reload before saving');
+        }
+        return r.json().then(function (body) {
+          if (!r.ok) throw new Error((body && body.message) || ('HTTP ' + r.status));
+          self.sha = body.content.sha;   // keep in step for the next save
+          return body;
+        });
+      });
+    }
+  };
+
+  var backend = IS_LOCAL ? LocalBackend : GitHubBackend;
+
+  // -- load / save -----------------------------------------------------------
+
   function load() {
     setStatus('loading…', 'busy');
-    fetch('/api/content')
-      .then(function (r) { return r.json(); })
+    backend.load()
       .then(function (data) {
         content = data;
         dirty = false;
@@ -344,20 +486,10 @@
   function save() {
     setStatus('saving…', 'busy');
     $save.disabled = true;
-    fetch('/api/content', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(content, null, 2)
-    })
-      .then(function (r) {
-        return r.json().then(function (body) {
-          if (!r.ok) throw new Error(body.error || ('HTTP ' + r.status));
-          return body;
-        });
-      })
+    backend.save(content)
       .then(function () {
         dirty = false;
-        setStatus('saved — index.html rebuilt', 'ok');
+        setStatus(backend.savedMessage, 'ok');
       })
       .catch(function (e) {
         setStatus('save failed: ' + e.message, 'err');
@@ -365,14 +497,68 @@
       });
   }
 
+  // -- startup ---------------------------------------------------------------
+
+  var $gate = document.getElementById('gate');
+  var $app = document.getElementById('app');
+  var $gateMsg = document.getElementById('gateMsg');
+  var $tokenInput = document.getElementById('token');
+  var $lock = document.getElementById('lockBtn');
+
+  function showEditor() {
+    $gate.hidden = true;
+    $app.hidden = false;
+    load();
+  }
+
+  function unlock(token, fromStorage) {
+    token = (token || '').trim();
+    if (!token) {
+      $gateMsg.textContent = 'Paste a token first.';
+      $gateMsg.className = 'err';
+      return;
+    }
+    $gateMsg.textContent = 'checking token…';
+    $gateMsg.className = 'busy';
+    GitHubBackend.verify(token)
+      .then(function () {
+        // Only persisted for this tab, and only once GitHub has confirmed it works.
+        try { sessionStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+        $tokenInput.value = '';
+        $gateMsg.textContent = '';
+        $gateMsg.className = '';
+        showEditor();
+      })
+      .catch(function (e) {
+        if (fromStorage) { try { sessionStorage.removeItem(TOKEN_KEY); } catch (e2) {} }
+        $gateMsg.textContent = e.message;
+        $gateMsg.className = 'err';
+      });
+  }
+
+  function lock() {
+    if (dirty && !confirm('Discard unsaved changes and lock?')) return;
+    try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    GitHubBackend.token = null;
+    GitHubBackend.sha = null;
+    content = null;
+    dirty = false;
+    $app.hidden = true;
+    $gate.hidden = false;
+  }
+
   $save.addEventListener('click', save);
+
   document.getElementById('previewBtn').addEventListener('click', function () {
-    window.open('/preview/index.html', '_blank', 'noopener');
+    window.open(IS_LOCAL ? '/preview/index.html' : '/', '_blank', 'noopener');
   });
+
   document.getElementById('reloadBtn').addEventListener('click', function () {
     if (dirty && !confirm('Discard unsaved changes?')) return;
     load();
   });
+
+  $lock.addEventListener('click', lock);
 
   window.addEventListener('beforeunload', function (e) {
     if (dirty) { e.preventDefault(); e.returnValue = ''; }
@@ -385,5 +571,25 @@
     }
   });
 
-  load();
+  if (IS_LOCAL) {
+    // No token needed: the local server already has file access.
+    showEditor();
+  } else {
+    $lock.hidden = false;
+    document.getElementById('unlockBtn').addEventListener('click', function () {
+      unlock($tokenInput.value, false);
+    });
+    $tokenInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') unlock($tokenInput.value, false);
+    });
+
+    var stored = null;
+    try { stored = sessionStorage.getItem(TOKEN_KEY); } catch (e) {}
+    if (stored) {
+      $gate.hidden = false;
+      unlock(stored, true);
+    } else {
+      $gate.hidden = false;
+    }
+  }
 })();

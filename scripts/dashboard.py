@@ -5,8 +5,9 @@
 
 Opens a small server on 127.0.0.1 that serves the dashboard UI, saves edits back
 to content.json, and re-runs the build so index.html is regenerated. Nothing here
-is ever deployed: the UI lives in _dashboard/, which Jekyll excludes from the
-published site, and this server is only ever reachable from this machine.
+is ever deployed: this server is only ever reachable from this machine. The same UI is also
+published at /dashboard/ on the live site, where it talks to the GitHub API
+instead; served from here it uses the local file API below and needs no token.
 
 Security posture -- this holds no credentials and can only touch files in the
 repo, but it does have write access to them, so it deliberately:
@@ -33,7 +34,7 @@ import threading
 import webbrowser
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-UI_DIR = ROOT / "_dashboard"
+UI_DIR = ROOT / "dashboard"
 CONTENT = ROOT / "content.json"
 BUILD = ROOT / "scripts" / "build.py"
 

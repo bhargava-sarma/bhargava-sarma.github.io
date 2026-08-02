@@ -1,0 +1,53 @@
+# Regenerates index.html whenever content.json changes.
+#
+# The hosted dashboard can only commit content.json -- there is no Python in the
+# browser to run the renderer -- so this closes the loop: it reruns build.py and
+# commits the regenerated index.html, which in turn triggers the Pages deploy.
+#
+# Editing locally already runs the build before committing, in which case this
+# finds nothing to do and exits without a commit.
+name: Rebuild site
+
+on:
+  push:
+    branches: [main]
+    # Deliberately does NOT include index.html: this workflow commits that file,
+    # and listing it here would make the workflow retrigger itself.
+    paths:
+      - content.json
+      - scripts/build.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-site
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Render content.json into index.html
+        run: python3 scripts/build.py
+
+      - name: Verify the CSP hash still matches the inline script
+        run: python3 scripts/csp-hash.py --check
+
+      - name: Commit regenerated index.html
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "index.html already up to date; nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Rebuild index.html from content.json"
+          git push
