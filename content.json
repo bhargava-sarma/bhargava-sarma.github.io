@@ -5,13 +5,29 @@
   },
   "hero": {
     "eyebrow": "AI/ML Engineer · Bengaluru, IN",
-    "titleLines": [["D", "Bhargava"], ["Rama", "Sarma"]],
+    "titleLines": [
+      [
+        "D",
+        "Bhargava"
+      ],
+      [
+        "Rama",
+        "Sarma"
+      ]
+    ],
     "description": "I build document intelligence pipelines, fault-tolerant systems, and applied ML tools - from OCR that reads scanned invoices to a RAFT consensus cluster running a shared drawing canvas.",
     "resumeFile": "RESUME_D_BHARGAVA_RAMA_SARMA.pdf"
   },
   "marquee": [
-    "Python", "Flask", "React", "Node.js", "Docker",
-    "TensorFlow", "PostgreSQL", "TypeScript", "Next.js"
+    "Python",
+    "Flask",
+    "React",
+    "Node.js",
+    "Docker",
+    "TensorFlow",
+    "PostgreSQL",
+    "TypeScript",
+    "Next.js"
   ],
   "work": [
     {
@@ -35,16 +51,16 @@
   ],
   "projects": [
     {
+      "title": "Parkinson's Disease Detector",
+      "description": "An ML pipeline that flags Parkinson's disease markers from voice and drawing samples, the same multimodal approach later extended during the CHEL research internship.",
+      "stack": "Python · ML · Audio",
+      "url": "https://github.com/bhargava-sarma/parkinson-disease-detector"
+    },
+    {
       "title": "Real-Time Collaborative Drawing Board",
       "description": "A RAFT-inspired consensus algorithm across a 3-node replica cluster - automatic leader election, majority log replication, follower recovery after restart - driving a live multi-user canvas broadcast over WebSocket.",
       "stack": "Node · WebSocket · Docker",
       "url": "https://github.com/bhargava-sarma/Distributed-Real-Time-Drawing-Board-with-Mini-RAFT"
-    },
-    {
-      "title": "Global Conflict & Event Tracker",
-      "description": "A real-time intelligence dashboard using Perplexity AI for NLP event extraction and severity classification on an hourly ingestion pipeline, mapped live with clustering markers on React-Leaflet.",
-      "stack": "Next.js · Supabase · Leaflet",
-      "url": "https://github.com/bhargava-sarma/global-conflict-tracker"
     },
     {
       "title": "Sports Celebrity Image Classification",
@@ -59,12 +75,6 @@
       "url": "https://github.com/bhargava-sarma/Election-Management-System"
     },
     {
-      "title": "Parkinson's Disease Detector",
-      "description": "An ML pipeline that flags Parkinson's disease markers from voice and drawing samples, the same multimodal approach later extended during the CHEL research internship.",
-      "stack": "Python · ML · Audio",
-      "url": "https://github.com/bhargava-sarma/parkinson-disease-detector"
-    },
-    {
       "title": "Traffic Sign Detection Robot",
       "description": "A ROS 2 Jazzy simulation of an autonomous differential-drive robot that detects traffic signs with a GTSRB-trained CNN and reacts in real time - slowing, stopping, or speeding up - across 7 coordinated nodes with RViz2 visualization and no external simulator.",
       "stack": "ROS 2 · TensorFlow · OpenCV",
@@ -75,14 +85,35 @@
       "description": "A price estimator for Bengaluru housing trained on historical sale data, predicting value from square footage, BHK, and bathroom count through a Flask backend with a web client frontend.",
       "stack": "Python · Flask · Scikit-learn",
       "url": "https://github.com/bhargava-sarma/Real-Estate-Price-Prediction"
+    },
+    {
+      "title": "Global Conflict & Event Tracker",
+      "description": "A real-time intelligence dashboard using Perplexity AI for NLP event extraction and severity classification on an hourly ingestion pipeline, mapped live with clustering markers on React-Leaflet.",
+      "stack": "Next.js · Supabase · Leaflet",
+      "url": "https://github.com/bhargava-sarma/global-conflict-tracker"
     }
   ],
   "skills": [
-    { "label": "Languages", "items": "Python, JavaScript, TypeScript, Java, C++" },
-    { "label": "Web & Backend", "items": "React, Next.js, Node.js, Express.js, FastAPI, Flask" },
-    { "label": "Databases", "items": "MongoDB, PostgreSQL, Supabase" },
-    { "label": "ML / AI & Tools", "items": "TensorFlow, Keras, XGBoost, Scikit-learn, OpenCV, Pandas, NumPy, Docker, Git" },
-    { "label": "Certifications", "items": "Machine Learning Specialization - DeepLearning.AI, Blockchain Basics - Cyfrin Updraft, Licensed Amateur Radio Operator VU3FHA" }
+    {
+      "label": "Languages",
+      "items": "Python, JavaScript, TypeScript, Java, C++"
+    },
+    {
+      "label": "Web & Backend",
+      "items": "React, Next.js, Node.js, Express.js, FastAPI, Flask"
+    },
+    {
+      "label": "Databases",
+      "items": "MongoDB, PostgreSQL, Supabase"
+    },
+    {
+      "label": "ML / AI & Tools",
+      "items": "TensorFlow, Keras, XGBoost, Scikit-learn, OpenCV, Pandas, NumPy, Docker, Git"
+    },
+    {
+      "label": "Certifications",
+      "items": "Machine Learning Specialization - DeepLearning.AI, Blockchain Basics - Cyfrin Updraft, Licensed Amateur Radio Operator VU3FHA"
+    }
   ],
   "extra": [
     {
@@ -118,8 +149,14 @@
     "emailUser": "bhargavaramasarma",
     "emailDomain": "gmail.com",
     "links": [
-      { "label": "GitHub", "url": "https://github.com/bhargava-sarma" },
-      { "label": "LinkedIn", "url": "#" }
+      {
+        "label": "GitHub",
+        "url": "https://github.com/bhargava-sarma"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/bhargav-sarma/"
+      }
     ]
   }
 }
