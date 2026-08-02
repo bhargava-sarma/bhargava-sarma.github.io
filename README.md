@@ -29,24 +29,39 @@ style.css           All styling, including both themes
 app.js              Nav scroll state, mobile menu, reveals, marquee, theme toggle, email copy
 CNAME               Custom domain for GitHub Pages
 _config.yml         Keeps tooling out of the published site
-_dashboard/         Local editor UI — never deployed
+robots.txt          Keeps /dashboard/ out of search results
+dashboard/          The editor UI — served at /dashboard/, also used locally
 scripts/build.py    Renders content.json into index.html
 scripts/dashboard.py  Local editor server
 scripts/csp-hash.py   CSP hash generator/checker
+.github/workflows/build-site.yml  Reruns the build when content.json changes
 ```
 
 ## Updating content
 
-Run the dashboard instead of hand-editing markup:
+There is one dashboard, reachable two ways. Both edit `content.json`; neither requires
+touching markup.
+
+### From anywhere — <https://bhargava-sarma.me/dashboard/>
+
+Open it on any device and paste a GitHub **fine-grained** token scoped to this repository
+with `Contents: Read and write`. **Save & publish** commits `content.json` straight to
+`main`; a GitHub Action reruns the build and the site redeploys in about a minute.
+
+The token lives only in that browser tab's `sessionStorage` — it is never written to the
+repository, and closing the tab (or pressing **Lock**) discards it. The page is public, but
+inert without a token: it is verified against GitHub before the editor appears, and a
+read-only or wrong-repo token is refused at the gate.
+
+### On your own machine
 
 ```
 python3 scripts/dashboard.py
 ```
 
-It opens `http://127.0.0.1:4173` with a form for every section — add, edit, reorder or
-delete projects, jobs, skills and the rest. **Save & rebuild** writes `content.json` and
-regenerates `index.html`. Review with `git diff`, then commit and push as usual; the
-dashboard deliberately does not touch git.
+Serves the same UI at `http://127.0.0.1:4173` with no token needed — the local server has
+file access, so it writes `content.json` and reruns the build directly. Review with
+`git diff`, then commit and push yourself; this mode deliberately does not touch git.
 
 Project numbering (`01`, `02`, …) follows list order and is generated, so reordering
 projects renumbers them automatically.
@@ -58,21 +73,30 @@ drifted out of sync, which makes it useful in a pre-commit hook.
 Everything outside the `<!-- build:… -->` markers in `index.html` (the head, nav, section
 headings, CSP) is hand-maintained and left untouched by the generator.
 
-### Why the dashboard is not on the website
+### How the hosted dashboard is secured
 
-GitHub Pages serves static files with no server-side code, so a hosted admin page could not
-be given a real login — any check in client-side JavaScript is visible to, and bypassable
-by, anyone who views source. So the dashboard runs on your machine only:
+GitHub Pages has no server-side code, so there is nothing to hold a password against and no
+way to gate the URL — a login check written in JavaScript is visible in view-source and
+trivially skipped. The page is therefore designed to be safe while public rather than
+pretending to be hidden:
 
-- it lives in `_dashboard/`, which `_config.yml` and Jekyll's underscore convention both
-  keep out of the published site;
-- its server binds `127.0.0.1` only, and rejects requests with a non-loopback `Host` or a
-  cross-origin `Origin`, so no website can reach it through your browser;
-- it holds no credentials and cannot reach GitHub, so even if the directory were somehow
-  published it would expose nothing and grant no access.
+- **It stores no credentials.** Authority comes from a token you supply per session, held in
+  `sessionStorage` and gone when the tab closes. Nothing sensitive is in the repository.
+- **The token is verified before use**, and refused if it is read-only or cannot see this
+  repository — so a wrong token fails at the gate, not halfway through a save.
+- **Its CSP allows `connect-src` to `api.github.com` and this origin only**, so a script that
+  somehow ran on the page has nowhere to exfiltrate a token to.
+- **Scope the token narrowly**: fine-grained, this repository only, `Contents: Read and
+  write`, short expiry. Then the worst case is edits to this one repo, revocable from
+  GitHub's settings at any time.
 
-**Do not add a `.nojekyll` file to this repo.** That switches Jekyll off entirely, which
-would publish `_dashboard/` and `scripts/` at real URLs.
+Anyone can open `/dashboard/`. Without a token they see a locked form that does nothing.
+
+The site's own CSP is unchanged and does not permit `connect-src` — the dashboard's policy
+is separate and applies only to that page.
+
+**Do not add a `.nojekyll` file to this repo.** That switches Jekyll off entirely and would
+publish `scripts/` and `content.json` at real URLs.
 
 ## Security
 

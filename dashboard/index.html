@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  This page is served publicly, so it is locked down accordingly:
+
+  * It holds no credentials. Editing requires a GitHub token that only ever
+    exists in this tab's sessionStorage; nothing is stored in the repository.
+  * connect-src allows only api.github.com and this origin -- the latter for the
+    local editor server, which serves this same page from 127.0.0.1 and saves
+    over its own API. A script that somehow ran here has nowhere else to send a
+    token.
+  * noindex keeps it out of search results (see also robots.txt). That is
+    tidiness, not a security control -- the real control is that the page is
+    inert without a token.
+-->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'self';
+  style-src 'self';
+  connect-src 'self' https://api.github.com;
+  img-src 'self' data:;
+  base-uri 'none';
+  form-action 'none';
+  object-src 'none';
+  require-trusted-types-for 'script';
+  upgrade-insecure-requests;
+">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Portfolio dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0b0c'/%3E%3Ctext x='50%25' y='53%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-weight='700' font-size='17' fill='%237aa2f7'%3ED%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<!-- Shown until a working token is supplied (remote mode only). -->
+<div class="gate" id="gate" hidden>
+  <div class="box">
+    <h2>Portfolio dashboard</h2>
+    <p>This page edits <code>content.json</code> in your repository through the GitHub API.
+       It needs a token with permission to write to that one repository.</p>
+    <ol>
+      <li>Open <code>github.com/settings/personal-access-tokens</code> and create a
+          <strong>fine-grained</strong> token.</li>
+      <li>Repository access: <strong>only</strong> <code>bhargava-sarma.github.io</code>.</li>
+      <li>Permissions: <code>Contents</code> → <strong>Read and write</strong>. Nothing else.</li>
+      <li>Give it a short expiry. Paste it below.</li>
+    </ol>
+    <div class="field">
+      <label for="token">GitHub fine-grained token</label>
+      <input type="password" id="token" autocomplete="off" spellcheck="false"
+             placeholder="github_pat_…">
+    </div>
+    <button class="primary" id="unlockBtn" type="button">Unlock</button>
+    <div id="gateMsg"></div>
+    <p class="warn">The token stays in this tab only — it is cleared when you close it, and is
+       never written to the repository. Anyone can open this page, but without a token it can
+       do nothing. If you paste one on a shared machine, revoke it afterwards.</p>
+  </div>
+</div>
+
+<!-- The editor itself. -->
+<div id="app" hidden>
+  <header>
+    <h1>Portfolio dashboard</h1>
+    <span id="status">loading…</span>
+    <span class="spacer"></span>
+    <button id="reloadBtn" type="button">Discard changes</button>
+    <button id="previewBtn" type="button">View site</button>
+    <button id="lockBtn" type="button" hidden>Lock</button>
+    <button id="saveBtn" class="primary" type="button" disabled>Save &amp; publish</button>
+  </header>
+
+  <div class="layout">
+    <nav id="nav"></nav>
+    <main id="form"></main>
+  </div>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
