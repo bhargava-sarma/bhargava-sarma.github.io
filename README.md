@@ -4,7 +4,13 @@ Personal portfolio site for D Bhargava Rama Sarma — AI/ML engineer. Live at [b
 
 ## Stack
 
-Plain HTML, CSS, and vanilla JavaScript — no framework, no build step, no dependencies. Fonts (Inter, JetBrains Mono) are loaded from Google Fonts.
+Plain HTML, CSS, and vanilla JavaScript — no framework and no dependencies. Fonts (Inter,
+JetBrains Mono) are loaded from Google Fonts.
+
+The deployed site is fully pre-rendered static HTML. Content lives in `content.json` and is
+rendered into `index.html` by a small Python script (standard library only) rather than
+fetched and rendered in the browser, so there is no flash of empty content, no SEO cost, and
+no need to loosen the CSP.
 
 ## Features
 
@@ -17,11 +23,56 @@ Plain HTML, CSS, and vanilla JavaScript — no framework, no build step, no depe
 ## Structure
 
 ```
-index.html   Page markup and content
-style.css    All styling, including both themes
-app.js       Nav scroll state, mobile menu, reveal animations, marquee, theme toggle, email copy
-CNAME        Custom domain for GitHub Pages
+content.json        All editable site copy — projects, work, skills, education, contact
+index.html          Page markup; the content regions are generated from content.json
+style.css           All styling, including both themes
+app.js              Nav scroll state, mobile menu, reveals, marquee, theme toggle, email copy
+CNAME               Custom domain for GitHub Pages
+_config.yml         Keeps tooling out of the published site
+_dashboard/         Local editor UI — never deployed
+scripts/build.py    Renders content.json into index.html
+scripts/dashboard.py  Local editor server
+scripts/csp-hash.py   CSP hash generator/checker
 ```
+
+## Updating content
+
+Run the dashboard instead of hand-editing markup:
+
+```
+python3 scripts/dashboard.py
+```
+
+It opens `http://127.0.0.1:4173` with a form for every section — add, edit, reorder or
+delete projects, jobs, skills and the rest. **Save & rebuild** writes `content.json` and
+regenerates `index.html`. Review with `git diff`, then commit and push as usual; the
+dashboard deliberately does not touch git.
+
+Project numbering (`01`, `02`, …) follows list order and is generated, so reordering
+projects renumbers them automatically.
+
+You can still edit `content.json` by hand — run `python3 scripts/build.py` afterwards to
+regenerate the page. `python3 scripts/build.py --check` exits non-zero if `index.html` has
+drifted out of sync, which makes it useful in a pre-commit hook.
+
+Everything outside the `<!-- build:… -->` markers in `index.html` (the head, nav, section
+headings, CSP) is hand-maintained and left untouched by the generator.
+
+### Why the dashboard is not on the website
+
+GitHub Pages serves static files with no server-side code, so a hosted admin page could not
+be given a real login — any check in client-side JavaScript is visible to, and bypassable
+by, anyone who views source. So the dashboard runs on your machine only:
+
+- it lives in `_dashboard/`, which `_config.yml` and Jekyll's underscore convention both
+  keep out of the published site;
+- its server binds `127.0.0.1` only, and rejects requests with a non-loopback `Host` or a
+  cross-origin `Origin`, so no website can reach it through your browser;
+- it holds no credentials and cannot reach GitHub, so even if the directory were somehow
+  published it would expose nothing and grant no access.
+
+**Do not add a `.nojekyll` file to this repo.** That switches Jekyll off entirely, which
+would publish `_dashboard/` and `scripts/` at real URLs.
 
 ## Security
 
