@@ -9,3 +9,8 @@ Thumbs.db
 
 # Local dev artifacts
 *.log
+
+# Python bytecode — scripts/dashboard.py imports build.py, so running the
+# dashboard generates these
+__pycache__/
+*.py[cod]

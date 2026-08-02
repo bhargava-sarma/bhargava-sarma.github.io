@@ -41,6 +41,50 @@ def esc_attr(value) -> str:
     return html.escape(str(value), quote=True)
 
 
+# Schemes allowed in any content-supplied URL. Anything else -- javascript:,
+# data:, vbscript: -- is refused rather than escaped, because escaping does not
+# help: the danger is the scheme itself, which fires on click.
+SAFE_SCHEMES = {"http", "https", "mailto"}
+_SCHEME_RE = re.compile(r"^([a-z][a-z0-9+.\-]*):", re.I)
+
+
+def check_url(value, where: str):
+    """Return a problem string if this URL is unsafe to put in an href, else None.
+
+    A URL with no scheme (``#contact``, ``resume.pdf``, ``/about``) is relative
+    and always fine. Leading and embedded whitespace is stripped first, since
+    browsers ignore it -- ``java\\tscript:`` navigates exactly like
+    ``javascript:``.
+    """
+    raw = str(value or "")
+    collapsed = re.sub(r"[\s\x00-\x1f]", "", raw)
+    match = _SCHEME_RE.match(collapsed)
+    if match and match.group(1).lower() not in SAFE_SCHEMES:
+        return f"{where}: refusing {match.group(1).lower()!r} URL ({raw!r})"
+    return None
+
+
+def url_problems(content: dict):
+    """Every unsafe URL in the content, as human-readable problems."""
+    problems = []
+    hero = content.get("hero") or {}
+    problem = check_url(hero.get("resumeFile"), "hero.resumeFile")
+    if problem:
+        problems.append(problem)
+    for i, project in enumerate(content.get("projects") or []):
+        if isinstance(project, dict):
+            problem = check_url(project.get("url"), f"projects[{i}].url")
+            if problem:
+                problems.append(problem)
+    links = (content.get("contact") or {}).get("links") or []
+    for i, link in enumerate(links):
+        if isinstance(link, dict):
+            problem = check_url(link.get("url"), f"contact.links[{i}].url")
+            if problem:
+                problems.append(problem)
+    return problems
+
+
 # --- region renderers -------------------------------------------------------
 # Each returns the inner HTML for one build region, already indented to match
 # the surrounding markup.
@@ -217,6 +261,14 @@ def build(html_text: str, content: dict) -> str:
 
 def main() -> int:
     content = json.loads(CONTENT.read_text(encoding="utf-8"))
+
+    # Refuse to render unsafe URLs rather than escaping them into the page.
+    problems = url_problems(content)
+    if problems:
+        for problem in problems:
+            print(f"error: {problem}", file=sys.stderr)
+        return 1
+
     current = INDEX.read_text(encoding="utf-8")
     rebuilt = build(current, content)
 

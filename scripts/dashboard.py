@@ -16,9 +16,12 @@ repo, but it does have write access to them, so it deliberately:
   * rejects requests whose Host header is not loopback, which is what stops a
     malicious page in your browser from driving it via DNS rebinding;
   * rejects cross-origin requests, so no other site can POST to it;
-  * validates the JSON shape before writing, so a malformed save cannot corrupt
-    content.json;
-  * resolves every preview path and refuses anything outside the repo.
+  * validates the JSON shape and every URL before writing, so neither a
+    malformed save nor a javascript: link can reach content.json;
+  * serves previews only from the set of files that actually get published --
+    resolving the path inside the repo is not enough on its own, since that
+    still leaves .git/ readable, and on a real machine .git/config can hold
+    credentials.
 
 After saving, review `git diff` and commit as usual -- this never touches git.
 """
@@ -33,12 +36,22 @@ import sys
 import threading
 import webbrowser
 
+# Same directory as this file, so this picks up scripts/build.py. Reusing its
+# checker keeps one definition of "URL safe enough to put in an href".
+import build
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 UI_DIR = ROOT / "dashboard"
 CONTENT = ROOT / "content.json"
 BUILD = ROOT / "scripts" / "build.py"
 
 ALLOWED_HOSTS = {"localhost", "127.0.0.1", "[::1]", "::1"}
+
+# The preview route exists to show the site as it will be published, so it
+# serves only what Jekyll publishes. Without this it would happily hand over
+# .git/config -- which on a real machine can hold credentials -- along with the
+# whole commit history and the source of this server.
+PREVIEW_DENY = {"scripts", "content.json", "README.md"}
 
 # Every top-level key the site needs, and the type it must have.
 REQUIRED = {
@@ -84,6 +97,9 @@ def validate(data):
         if not isinstance(lines, list) or not all(isinstance(l, list) for l in lines):
             problems.append("hero.titleLines must be a list of word lists")
 
+    # Refuse javascript:/data: URLs at the door, so they never reach the file.
+    problems.extend(build.url_problems(data))
+
     return problems
 
 
@@ -112,6 +128,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         # This tool must never be embedded or cached by anything.
         self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
@@ -146,6 +163,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         if path.startswith("/preview/"):
             rel = path[len("/preview/"):] or "index.html"
+            parts = [p for p in rel.split("/") if p]
+            # Dotted components cover .git, .github, .gitignore and friends.
+            if any(p.startswith(".") for p in parts) or (parts and parts[0] in PREVIEW_DENY):
+                return self._json(403, {"error": "not part of the published site"})
             return self._serve_file(ROOT / rel, ROOT)
 
         return self._serve_file(UI_DIR / path.lstrip("/"), UI_DIR)
