@@ -1,0 +1,15 @@
+# GitHub Pages (Jekyll) configuration.
+#
+# The published site is only ever: index.html, style.css, app.js, the resume PDF
+# and CNAME. Everything below is repo tooling and must NOT be served.
+#
+# _dashboard/ is already invisible to Jekyll because of the leading underscore;
+# it is listed here as well so the exclusion does not rest on that convention
+# alone. Do NOT add a .nojekyll file to this repo -- that disables Jekyll
+# entirely and would publish every path listed here, including the dashboard.
+exclude:
+  - _dashboard
+  - scripts
+  - content.json
+  - README.md
+  - .gitignore

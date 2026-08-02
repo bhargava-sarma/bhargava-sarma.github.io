@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "title": "D Bhargava Rama Sarma - AI/ML Engineer",
+    "description": "Portfolio of D Bhargava Rama Sarma - AI/ML engineer building document intelligence, distributed systems, and applied ML."
+  },
+  "hero": {
+    "eyebrow": "AI/ML Engineer · Bengaluru, IN",
+    "titleLines": [["D", "Bhargava"], ["Rama", "Sarma"]],
+    "description": "I build document intelligence pipelines, fault-tolerant systems, and applied ML tools - from OCR that reads scanned invoices to a RAFT consensus cluster running a shared drawing canvas.",
+    "resumeFile": "RESUME_D_BHARGAVA_RAMA_SARMA.pdf"
+  },
+  "marquee": [
+    "Python", "Flask", "React", "Node.js", "Docker",
+    "TensorFlow", "PostgreSQL", "TypeScript", "Next.js"
+  ],
+  "work": [
+    {
+      "date": "Jun 2026 - Jul 2026",
+      "role": "Software Engineering Intern",
+      "org": "Cyient",
+      "bullets": [
+        "Built an internal OCR document-understanding pipeline in a team of two - CNN layout detection, transformer text recognition, attention-based field extraction - reaching 88% extraction accuracy on scanned documents.",
+        "Designed the preprocessing layer end-to-end: denoising, deskewing, adaptive thresholding across ingestion, a key contributor to accuracy on low-quality scans."
+      ]
+    },
+    {
+      "date": "Jun 2025 - Jul 2025",
+      "role": "Research Intern",
+      "org": "Centre for Healthcare Engineering & Learning",
+      "bullets": [
+        "Trained XGBoost and k-NN models on librosa audio features and CNN image features to detect Parkinson's disease from voice, spiral, and wave-drawing inputs - 85% classification accuracy across three modalities.",
+        "Built a Flask app for real-time sample upload and AI symptom analysis, unifying all three input modes behind one interface."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "title": "Real-Time Collaborative Drawing Board",
+      "description": "A RAFT-inspired consensus algorithm across a 3-node replica cluster - automatic leader election, majority log replication, follower recovery after restart - driving a live multi-user canvas broadcast over WebSocket.",
+      "stack": "Node · WebSocket · Docker",
+      "url": "https://github.com/bhargava-sarma/Distributed-Real-Time-Drawing-Board-with-Mini-RAFT"
+    },
+    {
+      "title": "Global Conflict & Event Tracker",
+      "description": "A real-time intelligence dashboard using Perplexity AI for NLP event extraction and severity classification on an hourly ingestion pipeline, mapped live with clustering markers on React-Leaflet.",
+      "stack": "Next.js · Supabase · Leaflet",
+      "url": "https://github.com/bhargava-sarma/global-conflict-tracker"
+    },
+    {
+      "title": "Sports Celebrity Image Classification",
+      "description": "Image classifier using wavelet-transform feature extraction reaching 95% accuracy, served through a Flask + OpenCV backend with a Dropzone.js upload frontend.",
+      "stack": "Flask · OpenCV · Sklearn",
+      "url": "https://github.com/bhargava-sarma/sports-celebrity-classification"
+    },
+    {
+      "title": "Election Management System",
+      "description": "A system for managing elections end-to-end - candidate and voter registration, ballot handling, and result tabulation - built as a structured Flask application.",
+      "stack": "Python · Flask",
+      "url": "https://github.com/bhargava-sarma/Election-Management-System"
+    },
+    {
+      "title": "Parkinson's Disease Detector",
+      "description": "An ML pipeline that flags Parkinson's disease markers from voice and drawing samples, the same multimodal approach later extended during the CHEL research internship.",
+      "stack": "Python · ML · Audio",
+      "url": "https://github.com/bhargava-sarma/parkinson-disease-detector"
+    },
+    {
+      "title": "Traffic Sign Detection Robot",
+      "description": "A ROS 2 Jazzy simulation of an autonomous differential-drive robot that detects traffic signs with a GTSRB-trained CNN and reacts in real time - slowing, stopping, or speeding up - across 7 coordinated nodes with RViz2 visualization and no external simulator.",
+      "stack": "ROS 2 · TensorFlow · OpenCV",
+      "url": "https://github.com/bhargava-sarma/MAR-Jackfruit-Problem-Mini-Project-Team-4"
+    },
+    {
+      "title": "Real Estate Price Prediction",
+      "description": "A price estimator for Bengaluru housing trained on historical sale data, predicting value from square footage, BHK, and bathroom count through a Flask backend with a web client frontend.",
+      "stack": "Python · Flask · Scikit-learn",
+      "url": "https://github.com/bhargava-sarma/Real-Estate-Price-Prediction"
+    }
+  ],
+  "skills": [
+    { "label": "Languages", "items": "Python, JavaScript, TypeScript, Java, C++" },
+    { "label": "Web & Backend", "items": "React, Next.js, Node.js, Express.js, FastAPI, Flask" },
+    { "label": "Databases", "items": "MongoDB, PostgreSQL, Supabase" },
+    { "label": "ML / AI & Tools", "items": "TensorFlow, Keras, XGBoost, Scikit-learn, OpenCV, Pandas, NumPy, Docker, Git" },
+    { "label": "Certifications", "items": "Machine Learning Specialization - DeepLearning.AI, Blockchain Basics - Cyfrin Updraft, Licensed Amateur Radio Operator VU3FHA" }
+  ],
+  "extra": [
+    {
+      "date": "Nov-Dec 2024",
+      "text": "State Champion, Zonal Runner-up & National Finalist - RBI90 National Quiz Competition (prize pool exceeding ₹6L); top-3 finishes across multiple inter-college and inter-university quizzes."
+    },
+    {
+      "date": "2024-2025",
+      "text": "Multiple awards at inter-college Model United Nations conferences, including an Honourable Mention at Jigyasa 4.0 MUN; delegate across several committees."
+    },
+    {
+      "date": "Dec 2023 - May 2026",
+      "text": "Marketing & Operations Head, QQC Quiz Club, PES University - organized college and inter-college quizzes and curated question sets across science, tech, and current affairs."
+    },
+    {
+      "date": "Sep 2024 - May 2026",
+      "text": "Marketing Head, MUNSoc, PES University - managed end-to-end logistics for UniCon, an inter-college MUN conference with hundreds of participants."
+    }
+  ],
+  "education": [
+    {
+      "school": "PES University",
+      "degree": "B.Tech, Artificial Intelligence & Machine Learning",
+      "date": "Aug 2023 - May 2027 (expected)"
+    },
+    {
+      "school": "Vedanta PU College",
+      "degree": "Senior Secondary Education, PU Board Karnataka",
+      "date": "Jun 2021 - Apr 2023"
+    }
+  ],
+  "contact": {
+    "emailUser": "bhargavaramasarma",
+    "emailDomain": "gmail.com",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/bhargava-sarma" },
+      { "label": "LinkedIn", "url": "#" }
+    ]
+  }
+}
